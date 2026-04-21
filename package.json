@@ -2,10 +2,7 @@
   "name": "nano-banana",
   "version": "1.0.0",
   "description": "Nano Banana - Sistema de pedidos online",
-  "scripts": {
-    "dev": "npx vercel dev"
-  },
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   }
 }
