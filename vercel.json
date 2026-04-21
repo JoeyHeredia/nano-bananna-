@@ -8,12 +8,5 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/admin", "dest": "/admin.html" },
     { "src": "/", "dest": "/index.html" }
-  ],
-  "env": {
-    "WA_VERIFY_TOKEN": "@wa_verify_token",
-    "WA_TOKEN": "@wa_token",
-    "WA_PHONE_ID": "@wa_phone_id",
-    "MENU_URL": "@menu_url",
-    "OWNER_PHONE": "@owner_phone"
-  }
+  ]
 }
