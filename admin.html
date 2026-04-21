@@ -3,127 +3,100 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nano Banana 🍌 — Panel Administración</title>
+  <title>Nano Banana 🍌 — Admin</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍌</text></svg>" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --dark: #0d2137; --mid: #1a3a5c; --accent: #1e5f8e;
-      --gold: #c9a84c; --white: #f5faff;
-      --green: #2ecc71; --red: #e74c3c; --blue: #3498db;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--white); min-height: 100vh; }
-
-    /* LOGIN */
-    .login-screen { display: flex; min-height: 100vh; align-items: center; justify-content: center; padding: 1.5rem; }
-    .login-box { background: var(--mid); border-radius: 16px; padding: 2rem; width: 100%; max-width: 360px; border: 1px solid rgba(201,168,76,0.2); text-align: center; }
-    .login-box h1 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.6rem; margin-bottom: 0.4rem; }
-    .login-box p { color: #8ab4cc; font-size: 0.8rem; margin-bottom: 1.5rem; }
-    .login-input { width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.13); background: rgba(255,255,255,0.05); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; margin-bottom: 0.75rem; outline: none; }
-    .login-input::placeholder { color: #8ab4cc; }
-    .login-input:focus { border-color: var(--gold); }
-    .login-btn { width: 100%; padding: 0.85rem; border-radius: 10px; border: none; background: var(--gold); color: var(--dark); font-weight: 500; font-size: 0.95rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-    .login-error { color: #e74c3c; font-size: 0.8rem; margin-top: 0.5rem; display: none; }
-
-    /* MAIN APP */
-    #main-app { display: none; }
-    .header { background: var(--mid); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 20; }
-    .logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); }
-    .logo small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.62rem; letter-spacing: 3px; color: #8ab4cc; text-transform: uppercase; }
-    .nav { display: flex; gap: 4px; }
-    .nav button { padding: 0.48rem 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: none; color: #8ab4cc; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
-    .nav button.active { background: var(--gold); color: var(--dark); border-color: var(--gold); font-weight: 500; }
-    .logout-btn { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid rgba(231,76,60,0.4); background: none; color: #e74c3c; font-size: 0.75rem; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-
-    /* SECTIONS */
-    .section { display: none; padding: 1rem; }
-    .section.visible { display: block; }
-
-    /* STATS */
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 1rem; }
-    .stat { background: var(--mid); border-radius: 10px; padding: 0.9rem; text-align: center; }
-    .stat .val { font-size: 1.6rem; font-weight: 500; color: var(--gold); }
-    .stat .lbl { font-size: 0.65rem; color: #8ab4cc; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
-    /* LIVE BADGE */
-    .live-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.25); border-radius: 20px; padding: 3px 10px; font-size: 0.7rem; color: var(--green); margin-bottom: 0.75rem; }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    /* ORDERS */
-    .orders-list { display: flex; flex-direction: column; gap: 0.65rem; }
-    .order-card { background: var(--mid); border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.07); }
-    .order-card.new { border-color: rgba(52,152,219,0.45); }
-    .order-card.done { opacity: 0.55; }
-    .order-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-    .order-id { font-size: 0.7rem; color: #8ab4cc; }
-    .order-name { font-size: 0.95rem; color: #fff; font-weight: 500; margin-top: 1px; }
-    .order-phone { font-size: 0.76rem; color: #8ab4cc; }
-    .order-time { font-size: 0.7rem; color: #8ab4cc; text-align: right; }
-    .badge { font-size: 0.68rem; padding: 3px 9px; border-radius: 20px; font-weight: 500; display: inline-block; margin-top: 4px; }
-    .badge.new { background: rgba(52,152,219,0.18); color: #7ec8e3; }
-    .badge.processing { background: rgba(201,168,76,0.15); color: var(--gold); }
-    .badge.done { background: rgba(46,204,113,0.15); color: var(--green); }
-    .badge.cancelled { background: rgba(231,76,60,0.15); color: var(--red); }
-    .order-items { font-size: 0.8rem; color: #b0ccdf; margin-bottom: 0.75rem; padding-bottom: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .order-address { font-size: 0.78rem; color: #8ab4cc; margin-bottom: 0.65rem; }
-    .order-address a { color: var(--blue); }
-    .order-foot { display: flex; justify-content: space-between; align-items: center; }
-    .order-total { color: var(--gold); font-weight: 500; }
-    .order-actions { display: flex; gap: 0.4rem; }
-    .act-btn { padding: 4px 11px; border-radius: 6px; font-size: 0.73rem; border: 1px solid; background: none; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-    .act-btn.process { border-color: rgba(201,168,76,0.5); color: var(--gold); }
-    .act-btn.done { border-color: rgba(46,204,113,0.5); color: var(--green); }
-    .act-btn.cancel { border-color: rgba(231,76,60,0.4); color: var(--red); }
-    .no-orders { text-align: center; color: #8ab4cc; padding: 2.5rem; font-size: 0.88rem; }
-
-    /* MENU ADMIN */
-    .add-form { background: var(--mid); border-radius: 12px; padding: 1.2rem; border: 1.5px dashed rgba(201,168,76,0.3); margin-bottom: 1.25rem; }
-    .add-form-title { font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 0.9rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .adm-input { width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; outline: none; }
-    .adm-input::placeholder { color: #8ab4cc; }
-    .adm-input:focus { border-color: var(--gold); }
-    .adm-select { width: 100%; padding: 0.65rem 0.9rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--mid); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; margin-bottom: 0.5rem; }
-    .add-item-btn { width: 100%; padding: 0.72rem; border-radius: 10px; border: none; background: var(--gold); color: var(--dark); font-weight: 500; font-size: 0.88rem; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 0.25rem; }
-    .cat-group { margin-bottom: 1.25rem; }
-    .cat-title { font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: #8ab4cc; margin-bottom: 0.5rem; }
-    .menu-item-row { background: var(--mid); border-radius: 10px; padding: 0.8rem 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 0.4rem; transition: opacity 0.2s; }
-    .menu-item-row.inactive { opacity: 0.42; }
-    .mi-name { font-size: 0.88rem; color: #fff; }
-    .mi-desc { font-size: 0.73rem; color: #8ab4cc; }
-    .mi-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-    .mi-price { color: var(--gold); font-size: 0.88rem; font-weight: 500; min-width: 44px; text-align: right; }
-    .edit-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.13); background: none; color: #8ab4cc; cursor: pointer; font-size: 0.82rem; }
-    .toggle { width: 38px; height: 22px; border-radius: 11px; background: rgba(255,255,255,0.1); border: none; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
-    .toggle.on { background: var(--gold); }
-    .toggle::after { content:''; position: absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition: left 0.2s; }
-    .toggle.on::after { left:19px; }
-    .del-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(231,76,60,0.35); background: none; color: var(--red); cursor: pointer; font-size: 0.82rem; }
-
-    /* EDIT MODAL */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(13,33,55,0.95); z-index: 300; align-items: center; justify-content: center; padding: 1rem; }
-    .modal.open { display: flex; }
-    .modal-box { background: var(--mid); border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 360px; border: 1px solid rgba(201,168,76,0.25); }
-    .modal-box h3 { font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 1rem; font-size: 1.1rem; }
-    .modal-actions { display: flex; gap: 0.65rem; margin-top: 0.75rem; }
-    .modal-actions button { flex:1; padding: 0.65rem; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; }
-    .btn-cancel { background: none; border: 1px solid rgba(255,255,255,0.15); color: #8ab4cc; }
-    .btn-save { background: var(--gold); border: none; color: var(--dark); font-weight: 500; }
-
-    /* TOAST */
-    .toast { position: fixed; top: 1rem; right: 1rem; background: var(--gold); color: var(--dark); padding: 0.6rem 1.1rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500; z-index: 400; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .toast.show { opacity: 1; }
-
-    /* SPINNER */
-    .spinner { width: 28px; height: 28px; border: 2px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 2rem auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    :root{--dark:#0d2137;--mid:#1a3a5c;--gold:#c9a84c;--white:#f5faff;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;}
+    .login-screen{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:1.5rem;}
+    .login-box{background:var(--mid);border-radius:16px;padding:2rem;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.2);text-align:center;}
+    .login-box h1{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.6rem;margin-bottom:0.4rem;}
+    .login-box p{color:#8ab4cc;font-size:0.8rem;margin-bottom:1.5rem;}
+    .login-input{width:100%;padding:0.75rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,0.13);background:rgba(255,255,255,0.05);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;margin-bottom:0.75rem;outline:none;}
+    .login-input::placeholder{color:#8ab4cc;}
+    .login-input:focus{border-color:var(--gold);}
+    .login-btn{width:100%;padding:0.85rem;border-radius:10px;border:none;background:var(--gold);color:var(--dark);font-weight:500;font-size:0.95rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .login-error{color:#e74c3c;font-size:0.8rem;margin-top:0.5rem;display:none;}
+    #main-app{display:none;}
+    .header{background:var(--mid);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--gold);position:sticky;top:0;z-index:20;}
+    .logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);}
+    .logo small{display:block;font-family:'DM Sans',sans-serif;font-size:0.62rem;letter-spacing:3px;color:#8ab4cc;text-transform:uppercase;}
+    .nav{display:flex;gap:4px;}
+    .nav button{padding:0.48rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8ab4cc;font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;transition:all 0.2s;}
+    .nav button.active{background:var(--gold);color:var(--dark);border-color:var(--gold);font-weight:500;}
+    .logout-btn{padding:0.4rem 0.8rem;border-radius:8px;border:1px solid rgba(231,76,60,0.4);background:none;color:#e74c3c;font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .section{display:none;padding:1rem;}
+    .section.visible{display:block;}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-bottom:1rem;}
+    .stat{background:var(--mid);border-radius:10px;padding:0.9rem;text-align:center;}
+    .stat .val{font-size:1.6rem;font-weight:500;color:var(--gold);}
+    .stat .lbl{font-size:0.65rem;color:#8ab4cc;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+    .live-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.25);border-radius:20px;padding:3px 10px;font-size:0.7rem;color:var(--green);margin-bottom:0.75rem;}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .orders-list{display:flex;flex-direction:column;gap:0.65rem;}
+    .order-card{background:var(--mid);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.07);}
+    .order-card.new{border-color:rgba(52,152,219,0.45);}
+    .order-card.done{opacity:0.55;}
+    .order-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;}
+    .order-id{font-size:0.7rem;color:#8ab4cc;}
+    .order-name{font-size:0.95rem;color:#fff;font-weight:500;margin-top:1px;}
+    .order-phone{font-size:0.76rem;color:#8ab4cc;}
+    .badge{font-size:0.68rem;padding:3px 9px;border-radius:20px;font-weight:500;display:inline-block;margin-top:4px;}
+    .badge.new{background:rgba(52,152,219,0.18);color:#7ec8e3;}
+    .badge.processing{background:rgba(201,168,76,0.15);color:var(--gold);}
+    .badge.done{background:rgba(46,204,113,0.15);color:var(--green);}
+    .badge.cancelled{background:rgba(231,76,60,0.15);color:var(--red);}
+    .order-items{font-size:0.8rem;color:#b0ccdf;margin-bottom:0.75rem;padding-bottom:0.65rem;border-bottom:1px solid rgba(255,255,255,0.07);}
+    .order-address{font-size:0.78rem;color:#8ab4cc;margin-bottom:0.65rem;}
+    .order-address a{color:var(--blue);}
+    .order-foot{display:flex;justify-content:space-between;align-items:center;}
+    .order-total{color:var(--gold);font-weight:500;}
+    .order-actions{display:flex;gap:0.4rem;}
+    .act-btn{padding:4px 11px;border-radius:6px;font-size:0.73rem;border:1px solid;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .act-btn.process{border-color:rgba(201,168,76,0.5);color:var(--gold);}
+    .act-btn.done{border-color:rgba(46,204,113,0.5);color:var(--green);}
+    .act-btn.cancel{border-color:rgba(231,76,60,0.4);color:var(--red);}
+    .no-orders{text-align:center;color:#8ab4cc;padding:2.5rem;font-size:0.88rem;}
+    .add-form{background:var(--mid);border-radius:12px;padding:1.2rem;border:1.5px dashed rgba(201,168,76,0.3);margin-bottom:1.25rem;}
+    .add-form-title{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.9rem;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;}
+    .adm-input{width:100%;padding:0.65rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.84rem;outline:none;}
+    .adm-input::placeholder{color:#8ab4cc;}
+    .adm-input:focus{border-color:var(--gold);}
+    .adm-select{width:100%;padding:0.65rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:var(--mid);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.84rem;margin-bottom:0.5rem;}
+    .add-item-btn{width:100%;padding:0.72rem;border-radius:10px;border:none;background:var(--gold);color:var(--dark);font-weight:500;font-size:0.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:0.25rem;}
+    .cat-group{margin-bottom:1.25rem;}
+    .cat-title{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:#8ab4cc;margin-bottom:0.5rem;}
+    .menu-item-row{background:var(--mid);border-radius:10px;padding:0.8rem 1rem;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,0.06);margin-bottom:0.4rem;}
+    .menu-item-row.inactive{opacity:0.42;}
+    .mi-name{font-size:0.88rem;color:#fff;}
+    .mi-desc{font-size:0.73rem;color:#8ab4cc;}
+    .mi-right{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
+    .mi-price{color:var(--gold);font-size:0.88rem;font-weight:500;min-width:44px;text-align:right;}
+    .edit-btn{width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,0.13);background:none;color:#8ab4cc;cursor:pointer;font-size:0.82rem;}
+    .toggle{width:38px;height:22px;border-radius:11px;background:rgba(255,255,255,0.1);border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+    .toggle.on{background:var(--gold);}
+    .toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left 0.2s;}
+    .toggle.on::after{left:19px;}
+    .del-btn{width:28px;height:28px;border-radius:6px;border:1px solid rgba(231,76,60,0.35);background:none;color:var(--red);cursor:pointer;font-size:0.82rem;}
+    .modal{display:none;position:fixed;inset:0;background:rgba(13,33,55,0.95);z-index:300;align-items:center;justify-content:center;padding:1rem;}
+    .modal.open{display:flex;}
+    .modal-box{background:var(--mid);border-radius:14px;padding:1.5rem;width:100%;max-width:360px;border:1px solid rgba(201,168,76,0.25);}
+    .modal-box h3{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:1rem;font-size:1.1rem;}
+    .modal-actions{display:flex;gap:0.65rem;margin-top:0.75rem;}
+    .modal-actions button{flex:1;padding:0.65rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;cursor:pointer;}
+    .btn-cancel{background:none;border:1px solid rgba(255,255,255,0.15);color:#8ab4cc;}
+    .btn-save{background:var(--gold);border:none;color:var(--dark);font-weight:500;}
+    .toast{position:fixed;top:1rem;right:1rem;background:var(--gold);color:var(--dark);padding:0.6rem 1.1rem;border-radius:8px;font-size:0.82rem;font-weight:500;z-index:400;opacity:0;transition:opacity 0.3s;pointer-events:none;}
+    .toast.show{opacity:1;}
+    .spinner{width:28px;height:28px;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:2rem auto;}
+    @keyframes spin{to{transform:rotate(360deg);}}
   </style>
 </head>
 <body>
-
-<!-- LOGIN -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <h1>🍌 Nano Banana</h1>
@@ -134,8 +107,6 @@
     <div class="login-error" id="login-error">Correo o contraseña incorrectos</div>
   </div>
 </div>
-
-<!-- MAIN APP -->
 <div id="main-app">
   <div class="header">
     <div class="logo">🍌 NANO BANANA <small>Panel de administración</small></div>
@@ -147,8 +118,6 @@
       <button class="logout-btn" onclick="doLogout()">Salir</button>
     </div>
   </div>
-
-  <!-- ORDERS SECTION -->
   <div class="section visible" id="sec-orders">
     <div class="stats">
       <div class="stat"><div class="val" id="st-new">0</div><div class="lbl">Nuevos</div></div>
@@ -156,12 +125,8 @@
       <div class="stat"><div class="val" id="st-revenue">$0</div><div class="lbl">Ingresos</div></div>
     </div>
     <div class="live-badge"><div class="live-dot"></div>Actualizando en tiempo real</div>
-    <div class="orders-list" id="orders-list">
-      <div class="spinner"></div>
-    </div>
+    <div class="orders-list" id="orders-list"><div class="spinner"></div></div>
   </div>
-
-  <!-- MENU SECTION -->
   <div class="section" id="sec-menu">
     <div class="add-form">
       <div class="add-form-title">+ Agregar nuevo ítem</div>
@@ -173,15 +138,13 @@
       <select class="adm-select" id="new-cat"></select>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
         <input type="checkbox" id="new-fav" />
-        <label for="new-fav" style="font-size:0.82rem;color:#8ab4cc">Marcar como favorito de la casa ★</label>
+        <label for="new-fav" style="font-size:0.82rem;color:#8ab4cc">Marcar como favorito ★</label>
       </div>
       <button class="add-item-btn" onclick="addMenuItem()">Agregar al menú</button>
     </div>
     <div id="menu-admin-list"><div class="spinner"></div></div>
   </div>
 </div>
-
-<!-- Edit Modal -->
 <div class="modal" id="edit-modal">
   <div class="modal-box">
     <h3>Editar ítem</h3>
@@ -192,7 +155,7 @@
     </div>
     <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.3rem">
       <input type="checkbox" id="e-fav" />
-      <label for="e-fav" style="font-size:0.82rem;color:#8ab4cc">Favorito de la casa ★</label>
+      <label for="e-fav" style="font-size:0.82rem;color:#8ab4cc">Favorito ★</label>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -200,242 +163,160 @@
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const supabase = createClient(
   'https://tckfakmwfortjgqbsorn.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRja2Zha213Zm9ydGpncWJzb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODgxOTIsImV4cCI6MjA5MTc2NDE5Mn0.ew_n8EaJOmTgy3tdnf3HHyXXp2bM9vZegybx6aSlP-o'
 )
-
-let categories = []
-let editingItemId = null
-
-// ── AUTH ─────────────────────────────────────────────
-// Contraseña simple para el panel (sin auth de Supabase)
-// Cambia esto por tu contraseña real
-const ADMIN_PASS = 'mirian_2027'
 const ADMIN_EMAIL = 'criscuatro20@outlook.com'
+const ADMIN_PASS = 'miriannano2027'
+let categories = [], editingItemId = null
 
 window.doLogin = function() {
   const email = document.getElementById('login-email').value.trim()
   const pass = document.getElementById('login-pass').value
-  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
-    document.getElementById('login-screen').style.display = 'none'
-    document.getElementById('main-app').style.display = 'block'
+  if(email===ADMIN_EMAIL && pass===ADMIN_PASS){
+    sessionStorage.setItem('nb_auth','ok')
+    document.getElementById('login-screen').style.display='none'
+    document.getElementById('main-app').style.display='block'
     loadOrders(); loadMenuAdmin(); subscribeOrders()
+    document.getElementById('login-error').style.display='none'
   } else {
-    document.getElementById('login-error').style.display = 'block'
+    document.getElementById('login-error').style.display='block'
   }
 }
-
 window.doLogout = function() {
-  document.getElementById('login-screen').style.display = 'flex'
-  document.getElementById('main-app').style.display = 'none'
-  document.getElementById('login-pass').value = ''
-  document.getElementById('login-error').style.display = 'none'
+  sessionStorage.removeItem('nb_auth')
+  document.getElementById('login-screen').style.display='flex'
+  document.getElementById('main-app').style.display='none'
+  document.getElementById('login-pass').value=''
 }
-
-// ── SECTIONS ──────────────────────────────────────────
-window.showSection = function(sec, btn) {
+window.showSection = function(sec,btn) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'))
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
   document.getElementById('sec-'+sec).classList.add('visible')
   btn.classList.add('active')
-  if (sec==='menu') loadMenuAdmin()
+  if(sec==='menu') loadMenuAdmin()
 }
-
-// ── ORDERS ────────────────────────────────────────────
 async function loadOrders() {
   const today = new Date().toISOString().slice(0,10)
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .gte('created_at', today + 'T00:00:00')
-    .order('created_at', { ascending: false })
-  renderOrders(orders || [])
+  const {data:orders} = await supabase.from('orders').select('*, order_items(*)').gte('created_at',today+'T00:00:00').order('created_at',{ascending:false})
+  renderOrders(orders||[])
 }
-
 function subscribeOrders() {
-  supabase.channel('orders-realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => loadOrders())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, () => loadOrders())
-    .subscribe()
+  supabase.channel('orders-rt').on('postgres_changes',{event:'*',schema:'public',table:'orders'},()=>loadOrders()).on('postgres_changes',{event:'*',schema:'public',table:'order_items'},()=>loadOrders()).subscribe()
 }
-
 function renderOrders(orders) {
-  const newCount = orders.filter(o=>o.status==='new').length
-  const revenue = orders.reduce((s,o)=>s+Number(o.total),0)
-  document.getElementById('st-new').textContent = newCount
+  document.getElementById('st-new').textContent = orders.filter(o=>o.status==='new').length
   document.getElementById('st-total').textContent = orders.length
-  document.getElementById('st-revenue').textContent = `$${revenue.toFixed(0)}`
-
+  document.getElementById('st-revenue').textContent = '$'+orders.reduce((s,o)=>s+Number(o.total),0).toFixed(0)
   const list = document.getElementById('orders-list')
-  if (!orders.length) { list.innerHTML='<div class="no-orders">Sin pedidos hoy. Los nuevos pedidos aparecerán aquí en tiempo real.</div>'; return }
-
-  list.innerHTML = orders.map(o => {
-    const items = o.order_items || []
-    const itemsLine = items.map(i=>`${i.quantity}× ${i.name}`).join(' · ')
+  if(!orders.length){list.innerHTML='<div class="no-orders">Sin pedidos hoy. Los nuevos pedidos aparecerán aquí en tiempo real.</div>';return}
+  const labels = {new:'Nuevo',processing:'En proceso',done:'Listo',cancelled:'Cancelado'}
+  list.innerHTML = orders.map(o=>{
+    const items = o.order_items||[]
     const d = new Date(o.created_at)
-    const time = d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0')
-
+    const time = d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')
     let addrLine = ''
-    if (o.location_type==='gps' && o.location_lat) {
-      addrLine = `<a href="https://maps.google.com/?q=${o.location_lat},${o.location_lng}" target="_blank">📍 Ver en Maps</a>`
-    } else if (o.address_street) {
-      addrLine = `🏠 ${o.address_street}`
-      if (o.address_ref) addrLine += ` (${o.address_ref})`
-      if (o.address_sector) addrLine += ` — ${o.address_sector}`
-    }
-
-    const statusLabels = { new:'Nuevo', processing:'En proceso', done:'Listo', cancelled:'Cancelado' }
-
-    return `<div class="order-card ${o.status}" id="ord-${o.id}">
+    if(o.location_type==='gps'&&o.location_lat) addrLine=`<a href="https://maps.google.com/?q=${o.location_lat},${o.location_lng}" target="_blank">📍 Ver en Maps</a>`
+    else if(o.address_street) addrLine=`🏠 ${o.address_street}${o.address_ref?' ('+o.address_ref+')':''}${o.address_sector?' — '+o.address_sector:''}`
+    return `<div class="order-card ${o.status}">
       <div class="order-head">
-        <div>
-          <div class="order-id">#${o.id} · ${time}</div>
-          <div class="order-name">${o.customer_name}</div>
-          ${o.customer_phone?`<div class="order-phone">📞 ${o.customer_phone}</div>`:''}
-        </div>
-        <div><span class="badge ${o.status}">${statusLabels[o.status]||o.status}</span></div>
+        <div><div class="order-id">#${o.id} · ${time}</div><div class="order-name">${o.customer_name}</div>${o.customer_phone?`<div class="order-phone">📞 ${o.customer_phone}</div>`:''}</div>
+        <span class="badge ${o.status}">${labels[o.status]||o.status}</span>
       </div>
-      <div class="order-items">${itemsLine}</div>
+      <div class="order-items">${items.map(i=>`${i.quantity}× ${i.name}`).join(' · ')}</div>
       ${addrLine?`<div class="order-address">${addrLine}</div>`:''}
       <div class="order-foot">
         <span class="order-total">$${Number(o.total).toFixed(2)}</span>
         <div class="order-actions">
-          ${o.status==='new'?`<button class="act-btn process" onclick="setOrderStatus(${o.id},'processing')">En proceso</button>`:''}
-          ${o.status!=='done'&&o.status!=='cancelled'?`<button class="act-btn done" onclick="setOrderStatus(${o.id},'done')">✓ Listo</button>`:''}
-          ${o.status!=='cancelled'?`<button class="act-btn cancel" onclick="setOrderStatus(${o.id},'cancelled')">✕</button>`:''}
+          ${o.status==='new'?`<button class="act-btn process" onclick="setStatus(${o.id},'processing')">En proceso</button>`:''}
+          ${o.status!=='done'&&o.status!=='cancelled'?`<button class="act-btn done" onclick="setStatus(${o.id},'done')">✓ Listo</button>`:''}
+          ${o.status!=='cancelled'?`<button class="act-btn cancel" onclick="setStatus(${o.id},'cancelled')">✕</button>`:''}
         </div>
       </div>
     </div>`
   }).join('')
 }
-
-window.setOrderStatus = async function(id, status) {
-  await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
-  showToast(status==='done'?'✓ Pedido marcado como listo':status==='processing'?'Pedido en proceso':'Pedido cancelado')
+window.setStatus = async (id,status) => {
+  await supabase.from('orders').update({status,updated_at:new Date().toISOString()}).eq('id',id)
+  showToast(status==='done'?'✓ Pedido listo':status==='processing'?'En proceso':'Cancelado')
 }
-
-// ── MENU ADMIN ────────────────────────────────────────
 async function loadMenuAdmin() {
-  const { data: cats } = await supabase.from('menu_categories').select('*').order('sort_order')
-  const { data: items } = await supabase.from('menu_items').select('*').order('sort_order')
-  categories = cats || []
-  renderMenuAdmin(cats, items)
-  populateCatSelect(cats)
+  const {data:cats} = await supabase.from('menu_categories').select('*').order('sort_order')
+  const {data:items} = await supabase.from('menu_items').select('*').order('sort_order')
+  categories = cats||[]
+  renderMenuAdmin(cats,items)
+  document.getElementById('new-cat').innerHTML = cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')
 }
-
-function populateCatSelect(cats) {
-  const sel = document.getElementById('new-cat')
-  sel.innerHTML = cats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')
-}
-
-function renderMenuAdmin(cats, items) {
-  const el = document.getElementById('menu-admin-list')
-  el.innerHTML = cats.map(c => {
-    const catItems = items.filter(i=>i.category_id===c.id)
-    return `<div class="cat-group">
-      <div class="cat-title">${c.name}</div>
-      ${catItems.map(item=>`
-        <div class="menu-item-row ${!item.active?'inactive':''}">
-          <div>
-            <div class="mi-name">${item.name}${item.is_favorite?' ★':''}</div>
-            ${item.description?`<div class="mi-desc">${item.description}</div>`:''}
-          </div>
-          <div class="mi-right">
-            <span class="mi-price">$${Number(item.price).toFixed(2)}</span>
-            <button class="edit-btn" onclick="openEdit(${item.id})" title="Editar">✎</button>
-            <button class="toggle ${item.active?'on':''}" onclick="toggleItem(${item.id},${!item.active})"></button>
-            <button class="del-btn" onclick="deleteItem(${item.id})" title="Eliminar">✕</button>
-          </div>
-        </div>`).join('')}
-    </div>`
+function renderMenuAdmin(cats,items) {
+  document.getElementById('menu-admin-list').innerHTML = cats.map(c=>{
+    const ci = items.filter(i=>i.category_id===c.id)
+    return `<div class="cat-group"><div class="cat-title">${c.name}</div>${ci.map(item=>`
+      <div class="menu-item-row ${!item.active?'inactive':''}">
+        <div><div class="mi-name">${item.name}${item.is_favorite?' ★':''}</div>${item.description?`<div class="mi-desc">${item.description}</div>`:''}</div>
+        <div class="mi-right">
+          <span class="mi-price">$${Number(item.price).toFixed(2)}</span>
+          <button class="edit-btn" onclick="openEdit(${item.id})">✎</button>
+          <button class="toggle ${item.active?'on':''}" onclick="toggleItem(${item.id},${!item.active})"></button>
+          <button class="del-btn" onclick="deleteItem(${item.id})">✕</button>
+        </div>
+      </div>`).join('')}</div>`
   }).join('')
 }
-
-window.addMenuItem = async function() {
-  const name = document.getElementById('new-name').value.trim()
-  const price = parseFloat(document.getElementById('new-price').value)
-  const desc = document.getElementById('new-desc').value.trim()
-  const catId = parseInt(document.getElementById('new-cat').value)
-  const fav = document.getElementById('new-fav').checked
-  if (!name || !price) { alert('Nombre y precio son requeridos'); return }
-  await supabase.from('menu_items').insert([{ category_id: catId, name, description: desc, price, is_favorite: fav, active: true }])
-  document.getElementById('new-name').value = ''
-  document.getElementById('new-price').value = ''
-  document.getElementById('new-desc').value = ''
-  document.getElementById('new-fav').checked = false
-  showToast('Ítem agregado al menú')
-  loadMenuAdmin()
+window.addMenuItem = async () => {
+  const name=document.getElementById('new-name').value.trim()
+  const price=parseFloat(document.getElementById('new-price').value)
+  const desc=document.getElementById('new-desc').value.trim()
+  const catId=parseInt(document.getElementById('new-cat').value)
+  const fav=document.getElementById('new-fav').checked
+  if(!name||!price){alert('Nombre y precio son requeridos');return}
+  await supabase.from('menu_items').insert([{category_id:catId,name,description:desc,price,is_favorite:fav,active:true}])
+  document.getElementById('new-name').value=''
+  document.getElementById('new-price').value=''
+  document.getElementById('new-desc').value=''
+  document.getElementById('new-fav').checked=false
+  showToast('Ítem agregado'); loadMenuAdmin()
 }
-
-window.toggleItem = async function(id, active) {
-  await supabase.from('menu_items').update({ active, updated_at: new Date().toISOString() }).eq('id', id)
-  showToast(active ? 'Ítem activado' : 'Ítem desactivado')
-  loadMenuAdmin()
+window.toggleItem = async (id,active) => {
+  await supabase.from('menu_items').update({active,updated_at:new Date().toISOString()}).eq('id',id)
+  showToast(active?'Ítem activado':'Ítem desactivado'); loadMenuAdmin()
 }
-
-window.deleteItem = async function(id) {
-  if (!confirm('¿Eliminar este ítem del menú?')) return
-  await supabase.from('menu_items').delete().eq('id', id)
-  showToast('Ítem eliminado')
-  loadMenuAdmin()
+window.deleteItem = async id => {
+  if(!confirm('¿Eliminar este ítem?')) return
+  await supabase.from('menu_items').delete().eq('id',id)
+  showToast('Ítem eliminado'); loadMenuAdmin()
 }
-
-window.openEdit = async function(id) {
-  editingItemId = id
-  const { data: item } = await supabase.from('menu_items').select('*').eq('id', id).single()
-  document.getElementById('e-name').value = item.name
-  document.getElementById('e-price').value = item.price
-  document.getElementById('e-desc').value = item.description || ''
-  document.getElementById('e-fav').checked = item.is_favorite
+window.openEdit = async id => {
+  editingItemId=id
+  const {data:item} = await supabase.from('menu_items').select('*').eq('id',id).single()
+  document.getElementById('e-name').value=item.name
+  document.getElementById('e-price').value=item.price
+  document.getElementById('e-desc').value=item.description||''
+  document.getElementById('e-fav').checked=item.is_favorite
   document.getElementById('edit-modal').classList.add('open')
 }
-
-window.closeModal = function() {
-  document.getElementById('edit-modal').classList.remove('open')
-  editingItemId = null
+window.closeModal = () => { document.getElementById('edit-modal').classList.remove('open'); editingItemId=null }
+window.saveEdit = async () => {
+  const name=document.getElementById('e-name').value.trim()
+  const price=parseFloat(document.getElementById('e-price').value)
+  const desc=document.getElementById('e-desc').value.trim()
+  const fav=document.getElementById('e-fav').checked
+  if(!name||!price){alert('Nombre y precio requeridos');return}
+  await supabase.from('menu_items').update({name,price,description:desc,is_favorite:fav,updated_at:new Date().toISOString()}).eq('id',editingItemId)
+  closeModal(); showToast('Guardado'); loadMenuAdmin()
 }
-
-window.saveEdit = async function() {
-  const name = document.getElementById('e-name').value.trim()
-  const price = parseFloat(document.getElementById('e-price').value)
-  const desc = document.getElementById('e-desc').value.trim()
-  const fav = document.getElementById('e-fav').checked
-  if (!name || !price) { alert('Nombre y precio son requeridos'); return }
-  await supabase.from('menu_items').update({ name, price, description: desc, is_favorite: fav, updated_at: new Date().toISOString() }).eq('id', editingItemId)
-  closeModal()
-  showToast('Cambios guardados')
-  loadMenuAdmin()
-}
-
-// ── TOAST ─────────────────────────────────────────────
 function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2200)
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2200)
 }
-
-// ── INIT ──────────────────────────────────────────────
-// Auto-login si ya hay sesión guardada
-const savedPass = sessionStorage.getItem('nb_auth')
-if (savedPass === ADMIN_PASS) {
-  document.getElementById('login-screen').style.display = 'none'
-  document.getElementById('main-app').style.display = 'block'
+if(sessionStorage.getItem('nb_auth')==='ok'){
+  document.getElementById('login-screen').style.display='none'
+  document.getElementById('main-app').style.display='block'
   loadOrders(); loadMenuAdmin(); subscribeOrders()
-}
-
-// Guardar sesión al hacer login
-const origLogin = window.doLogin
-window.doLogin = function() {
-  const pass = document.getElementById('login-pass').value
-  origLogin()
-  if (pass === ADMIN_PASS) sessionStorage.setItem('nb_auth', pass)
 }
 </script>
 </body>
