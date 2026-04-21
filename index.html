@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nano Banana 🍌 — Menú</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍌</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #0d2137; --mid: #1a3a5c; --accent: #1e5f8e;
+      --gold: #c9a84c; --white: #f5faff; --success: #25D366;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--white); min-height: 100vh; }
+
+    /* HEADER */
+    .header { background: var(--mid); padding: 1.5rem 1.5rem 1rem; text-align: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 10; }
+    .logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); letter-spacing: 2px; }
+    .tagline { font-size: 0.72rem; letter-spacing: 4px; color: #8ab4cc; text-transform: uppercase; margin-top: 0.2rem; }
+    .hours { font-size: 0.72rem; color: #8ab4cc; margin-top: 0.3rem; }
+
+    /* TABS */
+    .tabs { display: flex; overflow-x: auto; background: var(--mid); padding: 0 0.5rem; gap: 2px; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { padding: 0.65rem 1rem; font-size: 0.76rem; letter-spacing: 1px; text-transform: uppercase; color: #8ab4cc; border-bottom: 3px solid transparent; white-space: nowrap; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: color 0.2s, border-color 0.2s; }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* MENU */
+    .menu-content { padding: 1rem; padding-bottom: 80px; }
+    .section-label { font-size: 0.68rem; letter-spacing: 3px; text-transform: uppercase; color: #8ab4cc; margin-bottom: 0.75rem; }
+    .items-grid { display: flex; flex-direction: column; gap: 0.65rem; }
+    .item-card { background: var(--mid); border-radius: 12px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.07); transition: border-color 0.2s; }
+    .item-card:hover { border-color: rgba(201,168,76,0.35); }
+    .item-card.unavailable { opacity: 0.4; pointer-events: none; }
+    .item-name { font-family: 'Playfair Display', serif; font-size: 0.97rem; color: #fff; }
+    .item-desc { font-size: 0.76rem; color: #8ab4cc; margin-top: 3px; }
+    .fav-tag { font-size: 0.68rem; color: var(--gold); margin-left: 5px; }
+    .item-right { display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0; }
+    .item-price { font-size: 0.97rem; font-weight: 500; color: var(--gold); }
+    .add-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); border: none; color: var(--dark); font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: transform 0.12s; }
+    .add-btn:hover { transform: scale(1.1); }
+
+    /* LOADING */
+    .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; gap: 1rem; }
+    .spinner { width: 36px; height: 36px; border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* CART BAR */
+    .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--gold); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; z-index: 50; transform: translateY(100%); transition: transform 0.3s ease; }
+    .cart-bar.visible { transform: translateY(0); }
+    .cart-bar span { font-weight: 500; color: var(--dark); font-size: 0.95rem; }
+    .cart-bar strong { color: var(--dark); font-size: 1.05rem; }
+    .cart-badge { background: var(--dark); color: var(--gold); border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; }
+
+    /* CART PANEL */
+    .panel { display: none; position: fixed; inset: 0; background: rgba(13,33,55,0.97); z-index: 100; flex-direction: column; }
+    .panel.open { display: flex; }
+    .panel-header { background: var(--mid); padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--gold); }
+    .close-btn { background: none; border: none; color: #8ab4cc; font-size: 1.5rem; cursor: pointer; padding: 0 0.25rem; }
+    .panel-body { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem; }
+    .cart-row { background: var(--mid); border-radius: 10px; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .cart-row-info span { font-size: 0.9rem; color: #fff; }
+    .cart-row-info small { display: block; font-size: 0.74rem; color: #8ab4cc; }
+    .qty-ctrl { display: flex; align-items: center; gap: 0.5rem; }
+    .qty-ctrl button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--gold); background: none; color: var(--gold); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .qty-ctrl span { font-size: 0.9rem; min-width: 20px; text-align: center; }
+    .empty-cart { text-align: center; color: #8ab4cc; padding: 2.5rem; font-size: 0.9rem; }
+    .panel-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+    .total-row span { color: #8ab4cc; }
+    .total-row strong { color: var(--gold); font-size: 1.1rem; }
+    .nb-input { width: 100%; padding: 0.72rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.13); background: var(--mid); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; margin-bottom: 0.65rem; outline: none; }
+    .nb-input::placeholder { color: #8ab4cc; }
+    .nb-input:focus { border-color: var(--gold); }
+    .confirm-btn { width: 100%; padding: 0.95rem; border-radius: 12px; border: none; background: var(--gold); color: var(--dark); font-size: 1rem; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .confirm-btn:hover { opacity: 0.88; }
+
+    /* LOCATION MODAL */
+    .loc-modal { display: none; position: fixed; inset: 0; background: rgba(13,33,55,0.98); z-index: 200; flex-direction: column; }
+    .loc-modal.open { display: flex; }
+    .loc-header { background: var(--mid); padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); flex-shrink: 0; }
+    .loc-header h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); }
+    .loc-body { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+    .loc-option { background: var(--mid); border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.1); padding: 1.1rem 1.2rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.9rem; transition: border-color 0.2s; }
+    .loc-option:hover { border-color: rgba(201,168,76,0.45); }
+    .loc-option.selected { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+    .loc-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .loc-icon.gps { background: rgba(46,204,113,0.15); }
+    .loc-icon.manual { background: rgba(30,95,142,0.25); }
+    .loc-text h3 { font-size: 0.93rem; color: #fff; font-weight: 500; margin-bottom: 3px; }
+    .loc-text p { font-size: 0.76rem; color: #8ab4cc; }
+    .divider { display: flex; align-items: center; gap: 0.75rem; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.09); }
+    .divider span { font-size: 0.7rem; color: #8ab4cc; letter-spacing: 2px; text-transform: uppercase; }
+    .manual-form { display: none; flex-direction: column; gap: 0.6rem; }
+    .manual-form.visible { display: flex; }
+    .loc-input { width: 100%; padding: 0.7rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; outline: none; position: relative; }
+    .loc-input::placeholder { color: #8ab4cc; }
+    .loc-input:focus { border-color: var(--gold); }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .gps-result { background: rgba(46,204,113,0.07); border: 1px solid rgba(46,204,113,0.22); border-radius: 10px; padding: 0.85rem 1rem; display: none; }
+    .gps-result.visible { display: block; }
+    .gps-result p { font-size: 0.82rem; color: #7be0a0; }
+    .gps-result small { font-size: 0.72rem; color: #8ab4cc; margin-top: 3px; display: block; }
+    .autocomplete-list { background: #112840; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; margin-top: 2px; overflow: hidden; display: none; }
+    .autocomplete-list.visible { display: block; }
+    .autocomplete-item { padding: 0.65rem 1rem; font-size: 0.82rem; color: #cce0f0; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.15s; }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: rgba(201,168,76,0.1); }
+    .loc-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; }
+    .wpp-btn { width: 100%; padding: 1rem; border-radius: 12px; border: none; background: var(--success); color: #fff; font-size: 1rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .wpp-btn:hover { opacity: 0.9; }
+    .wpp-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .loc-hint { font-size: 0.74rem; color: #8ab4cc; text-align: center; margin-top: 0.5rem; }
+
+    /* SUCCESS */
+    .success-screen { display: none; position: fixed; inset: 0; background: var(--dark); z-index: 300; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+    .success-screen.open { display: flex; }
+    .success-emoji { font-size: 4rem; margin-bottom: 1rem; }
+    .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); margin-bottom: 0.75rem; }
+    .success-screen p { color: #8ab4cc; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .back-btn { padding: 0.85rem 2rem; border-radius: 12px; border: 1.5px solid var(--gold); background: none; color: var(--gold); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🍌 NANO BANANA</div>
+  <div class="tagline">Sabor Ecuatoriano con Alma</div>
+  <div class="hours">Abierto · 7:00 a 19:00</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="menu-content" id="menu-content">
+  <div class="loading"><div class="spinner"></div><span style="color:#8ab4cc;font-size:0.85rem;">Cargando menú...</span></div>
+</div>
+
+<div class="cart-bar" id="cart-bar" onclick="openCart()">
+  <span>Ver carrito <span class="cart-badge" id="cart-count">0</span></span>
+  <strong id="cart-total-bar">$0.00</strong>
+</div>
+
+<!-- Cart Panel -->
+<div class="panel" id="cart-panel">
+  <div class="panel-header">
+    <h2>Tu pedido</h2>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="panel-body" id="cart-body"></div>
+  <div class="panel-footer">
+    <div class="total-row"><span>Total</span><strong id="cart-total">$0.00</strong></div>
+    <input class="nb-input" id="cust-name" placeholder="Tu nombre" />
+    <input class="nb-input" id="cust-phone" placeholder="Tu teléfono" type="tel" />
+    <button class="confirm-btn" onclick="openLoc()">Confirmar pedido →</button>
+  </div>
+</div>
+
+<!-- Location Modal -->
+<div class="loc-modal" id="loc-modal">
+  <div class="loc-header">
+    <h2>¿Dónde entregamos?</h2>
+    <button class="close-btn" onclick="closeLoc()">✕</button>
+  </div>
+  <div class="loc-body">
+    <div class="loc-option" id="opt-gps" onclick="selectGPS()">
+      <div class="loc-icon gps">📍</div>
+      <div class="loc-text"><h3>Usar mi ubicación actual</h3><p>Detectamos tu dirección automáticamente con GPS</p></div>
+    </div>
+    <div class="gps-result" id="gps-result">
+      <p id="gps-text">Obteniendo ubicación...</p>
+      <small id="gps-coords"></small>
+    </div>
+    <div class="divider"><span>o</span></div>
+    <div class="loc-option" id="opt-manual" onclick="selectManual()">
+      <div class="loc-icon manual">🏠</div>
+      <div class="loc-text"><h3>Ingresar dirección manualmente</h3><p>Escribe la dirección de entrega</p></div>
+    </div>
+    <div class="manual-form" id="manual-form">
+      <div style="position:relative">
+        <input class="loc-input" id="addr-street" placeholder="Calle principal y número (ej: Av. Amazonas N23-45)" autocomplete="off" oninput="onStreetInput(this.value)" />
+        <div class="autocomplete-list" id="autocomplete-list"></div>
+      </div>
+      <input class="loc-input" id="addr-ref" placeholder="Referencia (ej: frente al parque, edificio azul)" />
+      <div class="input-row">
+        <input class="loc-input" id="addr-sector" placeholder="Sector / Barrio" />
+        <input class="loc-input" id="addr-city" placeholder="Ciudad" value="Quito" />
+      </div>
+      <input class="loc-input" id="addr-notes" placeholder="Notas para el delivery (opcional)" />
+    </div>
+  </div>
+  <div class="loc-footer">
+    <button class="wpp-btn" id="wpp-btn" onclick="submitOrder()" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.104.546 4.08 1.5 5.808L0 24l6.371-1.473A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.855 0-3.595-.5-5.1-1.374l-.361-.214-3.785.875.908-3.682-.235-.375A9.94 9.94 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      Enviar pedido por WhatsApp
+    </button>
+    <p class="loc-hint" id="loc-hint">Selecciona una opción de entrega para continuar</p>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="success-screen" id="success-screen">
+  <div class="success-emoji">🍌</div>
+  <h2>¡Pedido enviado!</h2>
+  <p>Tu pedido fue enviado por WhatsApp.<br>Te contactaremos pronto para confirmar.</p>
+  <button class="back-btn" onclick="resetAll()">Volver al menú</button>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://tckfakmwfortjgqbsorn.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRja2Zha213Zm9ydGpncWJzb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxODgxOTIsImV4cCI6MjA5MTc2NDE5Mn0.ew_n8EaJOmTgy3tdnf3HHyXXp2bM9vZegybx6aSlP-o'
+)
+
+// ── CONFIG ──────────────────────────────────────────
+const OWNER_PHONE = '593993982751' 
+const GOOGLE_MAPS_KEY = 'TU_API_KEY_DE_GOOGLE_MAPS' // ← AGREGA TU KEY
+const MENU_URL = window.location.href
+
+let menuData = []
+let cart = {}
+let activeCategory = null
+let locMode = null
+let gpsData = null
+let autocompleteTimer = null
+
+// ── LOAD MENU ────────────────────────────────────────
+async function loadMenu() {
+  const { data: cats } = await supabase
+    .from('menu_categories').select('*').order('sort_order')
+  const { data: items } = await supabase
+    .from('menu_items').select('*').eq('active', true).order('sort_order')
+
+  menuData = cats.map(c => ({
+    ...c,
+    items: items.filter(i => i.category_id === c.id)
+  }))
+
+  activeCategory = cats[0]?.id
+  renderTabs()
+  renderMenu()
+
+  // Realtime: escucha cambios al menú
+  supabase.channel('menu').on('postgres_changes',
+    { event: '*', schema: 'public', table: 'menu_items' },
+    () => loadMenu()
+  ).subscribe()
+}
+
+function renderTabs() {
+  const el = document.getElementById('tabs')
+  el.innerHTML = menuData.map(c =>
+    `<button class="tab ${c.id===activeCategory?'active':''}" onclick="setCategory(${c.id})">${c.name}</button>`
+  ).join('')
+}
+
+window.setCategory = function(id) {
+  activeCategory = id
+  renderTabs()
+  renderMenu()
+}
+
+function renderMenu() {
+  const cat = menuData.find(c => c.id === activeCategory)
+  if (!cat) return
+  const el = document.getElementById('menu-content')
+  el.innerHTML = `
+    <div class="section-label">${cat.name}</div>
+    <div class="items-grid">
+      ${cat.items.map(item => `
+        <div class="item-card ${!item.active?'unavailable':''}">
+          <div>
+            <div class="item-name">${item.name}${item.is_favorite?'<span class="fav-tag">★ favorito</span>':''}</div>
+            ${item.description?`<div class="item-desc">${item.description}</div>`:''}
+          </div>
+          <div class="item-right">
+            <span class="item-price">$${Number(item.price).toFixed(2)}</span>
+            <button class="add-btn" onclick="addItem(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price})">+</button>
+          </div>
+        </div>`).join('')}
+    </div>`
+}
+
+// ── CART ─────────────────────────────────────────────
+window.addItem = function(id, name, price) {
+  cart[id] = cart[id]
+    ? { ...cart[id], qty: cart[id].qty + 1 }
+    : { id, name, price: Number(price), qty: 1 }
+  updateCartBar()
+}
+
+window.removeItem = function(id) {
+  if (cart[id]) { cart[id].qty--; if (cart[id].qty <= 0) delete cart[id] }
+  updateCartBar(); renderCartBody()
+}
+
+function updateCartBar() {
+  const entries = Object.values(cart)
+  const count = entries.reduce((s,i)=>s+i.qty,0)
+  const total = entries.reduce((s,i)=>s+i.price*i.qty,0)
+  const bar = document.getElementById('cart-bar')
+  bar.classList.toggle('visible', count > 0)
+  document.getElementById('cart-count').textContent = count
+  document.getElementById('cart-total-bar').textContent = `$${total.toFixed(2)}`
+}
+
+window.openCart = function() {
+  document.getElementById('cart-panel').classList.add('open')
+  renderCartBody()
+}
+
+window.closeCart = function() {
+  document.getElementById('cart-panel').classList.remove('open')
+}
+
+function renderCartBody() {
+  const entries = Object.values(cart)
+  const body = document.getElementById('cart-body')
+  if (!entries.length) { body.innerHTML='<div class="empty-cart">Tu carrito está vacío</div>'; setTotal(0); return }
+  body.innerHTML = entries.map(i=>`
+    <div class="cart-row">
+      <div class="cart-row-info">
+        <span>${i.name}</span>
+        <small>$${i.price.toFixed(2)} c/u — subtotal: $${(i.price*i.qty).toFixed(2)}</small>
+      </div>
+      <div class="qty-ctrl">
+        <button onclick="removeItem(${i.id})">−</button>
+        <span>${i.qty}</span>
+        <button onclick="addItem(${i.id},'${i.name.replace(/'/g,"\\'")}',${i.price})">+</button>
+      </div>
+    </div>`).join('')
+  setTotal(entries.reduce((s,i)=>s+i.price*i.qty,0))
+}
+
+function setTotal(t) {
+  document.getElementById('cart-total').textContent = `$${t.toFixed(2)}`
+}
+
+// ── LOCATION ─────────────────────────────────────────
+window.openLoc = function() {
+  const name = document.getElementById('cust-name').value.trim()
+  if (!Object.keys(cart).length) { alert('Tu carrito está vacío'); return }
+  if (!name) { alert('Por favor ingresa tu nombre'); document.getElementById('cust-name').focus(); return }
+  locMode = null; gpsData = null
+  document.getElementById('opt-gps').classList.remove('selected')
+  document.getElementById('opt-manual').classList.remove('selected')
+  document.getElementById('gps-result').classList.remove('visible')
+  document.getElementById('manual-form').classList.remove('visible')
+  document.getElementById('wpp-btn').disabled = true
+  document.getElementById('loc-hint').textContent = 'Selecciona una opción de entrega para continuar'
+  document.getElementById('cart-panel').classList.remove('open')
+  document.getElementById('loc-modal').classList.add('open')
+}
+
+window.closeLoc = function() {
+  document.getElementById('loc-modal').classList.remove('open')
+  document.getElementById('cart-panel').classList.add('open')
+}
+
+window.selectGPS = function() {
+  locMode = 'gps'
+  document.getElementById('opt-gps').classList.add('selected')
+  document.getElementById('opt-manual').classList.remove('selected')
+  document.getElementById('manual-form').classList.remove('visible')
+  document.getElementById('wpp-btn').disabled = true
+  document.getElementById('loc-hint').textContent = 'Obteniendo tu ubicación...'
+  const res = document.getElementById('gps-result')
+  res.classList.add('visible')
+  document.getElementById('gps-text').innerHTML = '<span>⏳ Detectando ubicación...</span>'
+  document.getElementById('gps-coords').textContent = ''
+  gpsData = null
+
+  if (!navigator.geolocation) {
+    document.getElementById('gps-text').textContent = '⚠ GPS no soportado. Usa dirección manual.'
+    return
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude.toFixed(6)
+    const lng = pos.coords.longitude.toFixed(6)
+    gpsData = { lat, lng }
+    document.getElementById('gps-text').textContent = '✓ Ubicación obtenida'
+    document.getElementById('gps-coords').textContent = `${lat}, ${lng}`
+    document.getElementById('wpp-btn').disabled = false
+    document.getElementById('loc-hint').textContent = '¡Listo! Pulsa el botón para enviar tu pedido'
+  }, err => {
+    const msgs = { 1:'⚠ Permiso denegado. Usa dirección manual.', 2:'⚠ No se pudo detectar. Usa dirección manual.', 3:'⚠ Tiempo agotado. Usa dirección manual.' }
+    document.getElementById('gps-text').textContent = msgs[err.code] || '⚠ Error de GPS'
+    document.getElementById('loc-hint').textContent = 'Prueba con la opción manual'
+  }, { timeout: 10000 })
+}
+
+window.selectManual = function() {
+  locMode = 'manual'
+  document.getElementById('opt-manual').classList.add('selected')
+  document.getElementById('opt-gps').classList.remove('selected')
+  document.getElementById('gps-result').classList.remove('visible')
+  document.getElementById('manual-form').classList.add('visible')
+  document.getElementById('wpp-btn').disabled = false
+  document.getElementById('loc-hint').textContent = 'Completa la dirección y envía tu pedido'
+  gpsData = null
+  setTimeout(() => document.getElementById('addr-street').focus(), 100)
+}
+
+// ── GOOGLE MAPS AUTOCOMPLETE ──────────────────────────
+window.onStreetInput = function(val) {
+  clearTimeout(autocompleteTimer)
+  const list = document.getElementById('autocomplete-list')
+  if (val.length < 3 || GOOGLE_MAPS_KEY === 'TU_API_KEY_DE_GOOGLE_MAPS') {
+    list.classList.remove('visible'); return
+  }
+  autocompleteTimer = setTimeout(async () => {
+    try {
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(val)}&components=country:ec&language=es&key=${GOOGLE_MAPS_KEY}`
+      const r = await fetch(url)
+      const data = await r.json()
+      if (!data.predictions?.length) { list.classList.remove('visible'); return }
+      list.innerHTML = data.predictions.slice(0,5).map(p =>
+        `<div class="autocomplete-item" onclick="selectAddress('${p.description.replace(/'/g,"\\'")}')">${p.description}</div>`
+      ).join('')
+      list.classList.add('visible')
+    } catch(e) { list.classList.remove('visible') }
+  }, 350)
+}
+
+window.selectAddress = function(addr) {
+  document.getElementById('addr-street').value = addr
+  document.getElementById('autocomplete-list').classList.remove('visible')
+}
+
+// ── SUBMIT ORDER ──────────────────────────────────────
+window.submitOrder = async function() {
+  const name = document.getElementById('cust-name').value.trim()
+  const phone = document.getElementById('cust-phone').value.trim()
+  const entries = Object.values(cart)
+  const total = entries.reduce((s,i)=>s+i.price*i.qty,0)
+  const btn = document.getElementById('wpp-btn')
+
+  let orderData = {
+    customer_name: name,
+    customer_phone: phone,
+    total,
+    status: 'new',
+    location_type: locMode
+  }
+  let addrLine = ''
+
+  if (locMode === 'gps' && gpsData) {
+    orderData.location_lat = parseFloat(gpsData.lat)
+    orderData.location_lng = parseFloat(gpsData.lng)
+    addrLine = `📍 GPS: https://maps.google.com/?q=${gpsData.lat},${gpsData.lng}`
+  } else if (locMode === 'manual') {
+    const street = document.getElementById('addr-street').value.trim()
+    if (!street) { alert('Por favor ingresa la calle'); document.getElementById('addr-street').focus(); return }
+    orderData.address_street = street
+    orderData.address_ref = document.getElementById('addr-ref').value.trim()
+    orderData.address_sector = document.getElementById('addr-sector').value.trim()
+    orderData.address_city = document.getElementById('addr-city').value.trim() || 'Quito'
+    orderData.address_notes = document.getElementById('addr-notes').value.trim()
+    addrLine = `🏠 ${street}`
+    if (orderData.address_ref) addrLine += `\n   Ref: ${orderData.address_ref}`
+    if (orderData.address_sector) addrLine += `\n   Sector: ${orderData.address_sector}`
+    if (orderData.address_city) addrLine += `\n   Ciudad: ${orderData.address_city}`
+    if (orderData.address_notes) addrLine += `\n   Notas: ${orderData.address_notes}`
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '⏳ Guardando pedido...'
+
+  // Guardar en Supabase
+  try {
+    const { data: order, error } = await supabase.from('orders').insert([orderData]).select().single()
+    if (error) throw error
+
+    await supabase.from('order_items').insert(
+      entries.map(i => ({ order_id: order.id, menu_item_id: i.id, name: i.name, price: i.price, quantity: i.qty }))
+    )
+
+    // Armar mensaje de WhatsApp
+    let msg = `*🍌 Nuevo Pedido — Nano Banana*\n\n`
+    msg += `🔢 Pedido #${order.id}\n`
+    msg += `👤 Cliente: ${name}\n`
+    if (phone) msg += `📞 Tel: ${phone}\n`
+    msg += `\n*Pedido:*\n`
+    entries.forEach(i => { msg += `• ${i.name} x${i.qty} — $${(i.price*i.qty).toFixed(2)}\n` })
+    msg += `\n*Total: $${total.toFixed(2)}*\n\n`
+    msg += addrLine
+
+    window.open(`https://wa.me/${OWNER_PHONE}?text=${encodeURIComponent(msg)}`, '_blank')
+    document.getElementById('loc-modal').classList.remove('open')
+    document.getElementById('success-screen').classList.add('open')
+  } catch(e) {
+    alert('Error al guardar el pedido. Intenta de nuevo.')
+    btn.disabled = false
+    btn.innerHTML = 'Enviar pedido por WhatsApp'
+  }
+}
+
+window.resetAll = function() {
+  cart = {}; locMode = null; gpsData = null
+  document.getElementById('success-screen').classList.remove('open')
+  document.getElementById('cust-name').value = ''
+  document.getElementById('cust-phone').value = ''
+  updateCartBar()
+}
+
+loadMenu()
+</script>
+</body>
+</html>
